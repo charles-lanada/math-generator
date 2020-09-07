@@ -1,0 +1,77 @@
+﻿@page "/addition"
+@using System
+@using System.Collections.Generic
+@using System.Linq
+
+<style>
+.addition-container {
+    height: 100vh;
+    overflow: auto;
+}
+.question {
+    margin-left: 48px;
+}
+</style>
+
+<div class="addition-container">
+    <h3>Addition Generator</h3>
+    
+    <div>
+        <ol class="steps">
+            @foreach (var questions in GenerateQuestions())
+            {
+                <li>
+                    <p class="question">@($"{questions.FirstNumberView} + {questions.SecondNumberView} = {questions.ResultView}")</p>
+                </li>
+            }
+        </ol>
+    </div>
+</div>
+
+@code {
+
+    private IEnumerable<QuestionDisplay> GenerateQuestions()
+    {
+        var randomizer = new Random();
+        var questionTypes = new List<string>
+        {
+            "hide-first-number",
+            "hide-second-number",
+            "hide-result"
+        };
+        return Enumerable.Range(1, 10).Select(x =>
+        {
+            var addDto = new AddDTO(randomizer.Next(1, 20), randomizer.Next(1, 20));
+            var randomIndex = randomizer.Next(questionTypes.Count);
+            var question = new QuestionDisplay(addDto, questionTypes[randomIndex]);
+            return question;
+        });
+    }
+
+    private class QuestionDisplay
+    {
+        public QuestionDisplay(AddDTO addDto, string questionType)
+        {
+            FirstNumberView = questionType == "hide-first-number" ? "___" : addDto.FirstNumber.ToString();
+            SecondNumberView = questionType == "hide-second-number" ? "___" : addDto.SecondNumber.ToString();
+            ResultView = questionType == "hide-result" ? "___" : addDto.Result.ToString();
+        }
+
+        public string FirstNumberView { get; }
+        public string SecondNumberView { get; }
+        public string ResultView { get; }
+    }
+
+    private class AddDTO
+    {
+        public AddDTO(int firstNumber, int secondNumber)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; }
+        public int SecondNumber { get; }
+        public int Result => FirstNumber + SecondNumber;
+    }
+}
